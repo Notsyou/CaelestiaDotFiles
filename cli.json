@@ -1,0 +1,5 @@
+{
+  "wallpaper": {
+    "postHook": "pkill -x mpvpaper; mpvpaper -o \"no-audio loop hwdec=auto\" \"*\" \"$WALLPAPER_PATH\" & disown; case \"$WALLPAPER_PATH\" in *.mp4|*.mkv|*.webm|*.mov|*.m4v) out=\"$HOME/.cache/caelestia/video-thumbs/$(basename \"$WALLPAPER_PATH\").jpg\"; mkdir -p \"$HOME/.cache/caelestia/video-thumbs\"; [ -f \"$out\" ] || ffmpeg -y -i \"$WALLPAPER_PATH\" -vframes 1 -vf scale=480:-1 \"$out\" -loglevel error ;; esac"
+  }
+}

@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+WALLS="$HOME/Pictures/Wallpapers"
+THUMBS="$HOME/.cache/caelestia/video-thumbs"
+mkdir -p "$THUMBS"
+find "$WALLS" -type f \( -iname "*.mp4" -o -iname "*.mkv" -o -iname "*.webm" -o -iname "*.mov" -o -iname "*.m4v" \) | while read -r f; do
+    rel="${f#$WALLS/}"
+    flat="${rel//\//_}"
+    out="$THUMBS/${flat}.jpg"
+    if [ ! -f "$out" ]; then
+        ffmpeg -y -i "$f" -vframes 1 -vf "scale=480:-1" "$out" -loglevel error
+        echo "Generated: $out"
+    fi
+done
