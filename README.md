@@ -1,37 +1,42 @@
-# Caelestia MP4 Wallpapers
+# CaelestiaDotFiles
 
-Adds MP4/video wallpaper support to the Caelestia dotfiles (CachyOS + Hyprland +
-Quickshell/Caelestia shell + caelestia-cli), using `mpvpaper` to render the
-video and patching the CLI/shell so videos behave like normal wallpapers in
-the `>wallpaper` picker (including thumbnails).
+My personal dotfiles for CachyOS + Hyprland + Caelestia shell. Includes MP4 wallpaper support, Hyprland config, and GTK/Thunar theming.
+
+## What's included
+
+### MP4/Video Wallpaper Support
+Patches Caelestia to accept video files as wallpapers using `mpvpaper`.
+
+### Hyprland Config (`hypr/hyprland.lua`)
+- Dual monitor setup (DP-3 @ 180hz + HDMI-A-1 @ 144hz portrait)
+- Catppuccin Mocha border colors
+- Custom keybindings
+- Autostart for waybar, mpvpaper, caelestia shell, wl-clip-persist
+
+### GTK/Thunar Theme (`gtk/`)
+- Dark theme matching Caelestia's Catppuccin Mocha colors
+- Custom Thunar file manager styling
+- Dark context menus, toolbars, and dropdowns
+
+### Caelestia Templates (`caelestia-templates/`)
+- Patched `gtk.css` and `thunar.css` templates so dark theme persists after Caelestia regenerates them
+
+---
 
 ## Requirements
 
-- `caelestia-cli` and `caelestia-shell` (already installed)
+- `caelestia-cli` and `caelestia-shell`
 - `mpvpaper`
 - `ffmpeg`
-
-Install missing deps:
+- `thunar`
+- `tumbler` + `ffmpegthumbnailer` (for thumbnails)
+- `wl-clip-persist`
 
 ```bash
-sudo pacman -S --needed mpvpaper ffmpeg
+sudo pacman -S --needed mpvpaper ffmpeg thunar tumbler ffmpegthumbnailer wl-clip-persist
 ```
 
-## What this does
-
-- Patches `caelestia.utils.wallpaper` (python) to accept video files
-  (`.mp4`, `.mkv`, `.webm`, `.mov`, `.m4v`) in `caelestia wallpaper -f`,
-  generating a first-frame thumbnail for the colour scheme.
-- Sets a `postHook` in `~/.config/caelestia/cli.json` that launches
-  `mpvpaper` (looping, muted, hw-decoded) on the selected video, and
-  auto-generates a `~/.cache/caelestia/video-thumbs/<filename>.jpg`
-  preview thumbnail.
-- Patches the Quickshell `Wallpapers.qml` file model to list video files,
-  not just images.
-- Patches `WallpaperItem.qml` (picker grid) to show the generated thumbnail
-  for videos, falling back to a movie icon if none exists yet.
-- Patches `Wallpaper.qml` (background renderer) to skip trying to load
-  video files as static images, letting `mpvpaper`'s layer show through.
+---
 
 ## Install
 
@@ -42,40 +47,74 @@ cd CaelestiaDotFiles
 ```
 
 This will:
-- Back up and patch the relevant files (with timestamped `.bak` copies)
+- Back up and patch the relevant Caelestia files
 - Install `~/.config/caelestia/cli.json`
 - Install `~/.local/bin/caelestia-gen-video-thumbs`
 
-Then restart Hyprland / the Caelestia shell (or run `caelestia shell`
-after killing the running instance) to apply the QML changes.
+### Manual steps after install
 
-## Generating thumbnails for existing videos
-
-New videos get a thumbnail generated automatically the first time you
-select them as wallpaper. To pre-generate thumbnails for everything in
-`~/Pictures/Wallpapers/` at once:
-
+**Hyprland config:**
 ```bash
-~/.local/bin/caelestia-gen-video-thumbs
+cp hypr/hyprland.lua ~/.config/hypr/hyprland.lua
+```
+> Edit the monitor lines to match your setup before using.
+
+**GTK/Thunar theme:**
+```bash
+cp gtk/gtk.css ~/.config/gtk-3.0/gtk.css
+cp gtk/thunar.css ~/.config/gtk-3.0/thunar.css
 ```
 
-If you rename a video file, its old thumbnail will not match the new name —
-rerun the script above to regenerate.
+**Caelestia templates (persistent dark theme):**
+```bash
+sudo cp caelestia-templates/gtk.css /usr/lib/python3.14/site-packages/caelestia/data/templates/gtk.css
+sudo cp caelestia-templates/thunar.css /usr/lib/python3.14/site-packages/caelestia/data/templates/thunar.css
+```
+> Re-run after `caelestia-cli` updates since package updates overwrite these.
 
-## Usage
+---
+
+## Keybindings
+
+| Keybind | Action |
+|---|---|
+| `Super + Return` | Terminal (kitty) |
+| `Super + E` | File manager (thunar) |
+| `Super + R` | App launcher (hyprlauncher) |
+| `Super + B` | Firefox |
+| `Super + D` | Caelestia launcher |
+| `Super + W` | Wallpaper picker |
+| `Super + Q` | Close window |
+| `Super + M` | Shutdown |
+| `Super + V` | Toggle float |
+| `Super + P` | Pseudo tile |
+| `Super + J` | Toggle split |
+| `Super + S` | Scratchpad |
+| `Super + Shift + S` | Move to scratchpad |
+| `Super + Alt + S` | Screenshot selection → clipboard |
+| `Super + Alt + F` | Screenshot → ~/Pictures |
+| `Super + Arrow keys` | Move focus |
+| `Super + 1-10` | Switch workspace |
+| `Super + Shift + 1-10` | Move window to workspace |
+
+---
+
+## Video Wallpapers
 
 ```bash
 caelestia wallpaper -f /path/to/video.mp4
 ```
 
-or pick it from the `>wallpaper` launcher like any other wallpaper.
+Or pick from the `>wallpaper` launcher. Pre-generate thumbnails for all videos in `~/Pictures/Wallpapers/`:
 
-## Notes / caveats
+```bash
+~/.local/bin/caelestia-gen-video-thumbs
+```
 
-- `caelestia-cli` / `caelestia-shell` package updates will overwrite the
-  patched files in `/usr/lib/python3.*/site-packages/caelestia` and
-  `/etc/xdg/quickshell/caelestia`. Re-run `./install.sh` after such updates.
-- Video extensions supported: `.mp4`, `.mkv`, `.webm`, `.mov`, `.m4v`.
-  Add more by editing `patches/wallpaper.py` (`VIDEO_EXTS`),
-  `patches/Wallpapers.qml` (`nameFilters`), and
-  `patches/WallpaperItem.qml` / `patches/Wallpaper.qml` (`isVideo` arrays).
+---
+
+## Notes
+
+- Caelestia package updates will overwrite patched files — re-run `./install.sh` and re-copy caelestia templates after updates.
+- Monitor config in `hyprland.lua` is specific to my setup, adjust to yours.
+- GTK theme uses Caelestia's Catppuccin Mocha color variables.
