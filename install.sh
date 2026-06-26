@@ -22,6 +22,10 @@ cp cli.json ~/.config/caelestia/cli.json
 cp caelestia-gen-video-thumbs ~/.local/bin/
 chmod +x ~/.local/bin/caelestia-gen-video-thumbs
 
+# Install Thunar and essential plugins
+echo "Installing Thunar file manager..."
+sudo pacman -S --needed thunar thunar-archive-plugin thunar-volman gvfs
+
 # ── GTK / Thunar Theme ────────────────────────────────────────────────────────
 
 echo "Installing GTK and Thunar theme..."
