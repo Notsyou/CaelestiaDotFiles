@@ -118,3 +118,27 @@ Or pick from the `>wallpaper` launcher. Pre-generate thumbnails for all videos i
 - Caelestia package updates will overwrite patched files — re-run `./install.sh` and re-copy caelestia templates after updates.
 - Monitor config in `hyprland.lua` is specific to my setup, adjust to yours.
 - GTK theme uses Caelestia's Catppuccin Mocha color variables.
+
+### 🛠️ Setup & Troubleshooting for Xwayland Bridge
+
+If you are trying to get this script running on a new setup (and especially if copy/pasting from XWayland apps like Roblox Studio is failing), follow these steps to ensure it executes correctly.
+
+**1. Make the Script Executable**
+Before Hyprland (or any autostart sequence) can run the script, it must have execute permissions. Run this once in your terminal:
+\`\`\`bash
+chmod +x ~/CaelestiaDotFiles/scripts/xwayland-clip-bridge.sh
+\`\`\`
+
+**2. Add to Hyprland Autostart**
+Add the exact path to your `hyprland.conf` or `autostart.lua`.
+*   **Correct Syntax:** `exec-once = ~/CaelestiaDotFiles/scripts/xwayland-clip-bridge.sh`
+*   **Common Pitfall:** Never mix the tilde shortcut with the `/home` path. Using `~/home/username/...` will break the path. Use either `~` **OR** the absolute path `/home/username/`.
+*   **Case Sensitivity:** Linux is strictly case-sensitive. Ensure the folder is `scripts` (lowercase) and the file includes the hyphens exactly as named (`xwayland-clip-bridge.sh`).
+
+**3. How to Test It Live**
+Instead of restarting your window manager to test if it works:
+1. Open your terminal and run the script manually: `~/CaelestiaDotFiles/scripts/xwayland-clip-bridge.sh`
+2. Leave the terminal running (it will just show a blank line).
+3. Open your target X11 app (e.g., Roblox Studio), copy some text.
+4. Switch to a native Wayland app (like Firefox or the terminal) and paste.
+5. If successful, hit `Ctrl + C` in the terminal to stop the manual run, and trust that your `exec-once` will handle it on the next boot!
