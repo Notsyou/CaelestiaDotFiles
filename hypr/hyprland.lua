@@ -24,7 +24,7 @@
 
 -- See https://wiki.hypr.land/Configuring/Basics/Monitors/
 hl.monitor({ output = "DP-3",     mode = "1920x1080@180", position = "0x0",    scale = 1 })
-hl.monitor({ output = "HDMI-A-1", mode = "1920x1080@144", position = "1920x-340", scale = 1, transform = 1 })
+hl.monitor({ output = "HDMI-A-1", mode = "1920x1080@144", position = "1920x-340", scale = 1, transform = 3 })
 
 ---------------------
 ---- MY PROGRAMS ----
@@ -49,10 +49,9 @@ hl.on("hyprland.start", function()
     hl.exec_cmd("wl-clip-persist --clipboard both")
     hl.exec_cmd(terminal)
     hl.exec_cmd("waybar")
-    hl.exec_cmd("mpvpaper")
+    hl.exec_cmd("~/.local/bin/caelestia-wallpaper-hook \"$(cat ~/.local/state/caelestia/wallpaper/path.txt)\"")
     hl.exec_cmd("firefox")
     hl.exec_cmd("QT_QPA_PLATFORM=wayland QT_QUICK_BACKEND=basic caelestia shell -d")
-    hl.exec_cmd("~/.local/bin/xwayland-clip-bridge.sh")
 end)
 
 
@@ -62,10 +61,11 @@ end)
 
 -- See https://wiki.hypr.land/Configuring/Advanced-and-Cool/Environment-variables/
 
-hl.env("XCURSOR_SIZE", "24")
-hl.env("HYPRCURSOR_SIZE", "24")
+hl.env("XCURSOR_SIZE", "20")
+hl.env("HYPRCURSOR_SIZE", "20")
 hl.env("LIBVA_DRIVER_NAME", "radeonsi")
-
+hl.env("QS_ICON_THEME", "Papirus-Dark")
+hl.env("QT_QPA_PLATFORMTHEME", "gtk3")
 -----------------------
 ----- PERMISSIONS -----
 -----------------------
@@ -75,7 +75,7 @@ hl.env("LIBVA_DRIVER_NAME", "radeonsi")
 -- for security reasons
 
 -- hl.config({
---   ecosystem = {
+--   ecosystem = 
 --     enforce_permissions = true,
 --   },
 -- })
@@ -92,13 +92,13 @@ hl.env("LIBVA_DRIVER_NAME", "radeonsi")
 -- Refer to https://wiki.hypr.land/Configuring/Basics/Variables/
 hl.config({
     general = {
-        gaps_in  = 5,
-        gaps_out = 10,
+        gaps_in  = 3,
+        gaps_out = 20,
 
-        border_size = 2,
+        border_size = 4,
 
         col = {
-            active_border   = { colors = {"rgba(cba6f7ee)", "rgba(89b4faee)"}, angle = 45 },
+            active_border   = { colors = {"rgba(255,255,255,0.5)"}, angle = 55 },
             inactive_border = "rgba(45475aaa)",
         },
 
@@ -112,12 +112,12 @@ hl.config({
     },
 
     decoration = {
-        rounding       = 7,
+        rounding       = 6,
         rounding_power = 5,
 
         -- Change transparency of focused and unfocused windows
-        active_opacity   = 1.0,
-        inactive_opacity = 1.0,
+        active_opacity   = 0.98,
+        inactive_opacity = 0.88,
 
         shadow = {
             enabled      = true,
@@ -145,27 +145,28 @@ hl.curve("easeInOutCubic", { type = "bezier", points = { {0.65, 0.05}, {0.36, 1}
 hl.curve("linear",         { type = "bezier", points = { {0, 0},       {1, 1}       } })
 hl.curve("almostLinear",   { type = "bezier", points = { {0.5, 0.5},   {0.75, 1}    } })
 hl.curve("quick",          { type = "bezier", points = { {0.15, 0},    {0.1, 1}     } })
+hl.curve("snap", { type = "bezier", points = { {0.05, 0.9}, {0.1, 1.0} } })
 
 -- Default springs
 hl.curve("easy",           { type = "spring", mass = 1, stiffness = 71.2633, dampening = 15.8273644 })
 
-hl.animation({ leaf = "global",        enabled = true,  speed = 10,   bezier = "default" })
-hl.animation({ leaf = "border",        enabled = true,  speed = 5.39, bezier = "easeOutQuint" })
-hl.animation({ leaf = "windows",       enabled = true,  speed = 4.79, spring = "easy" })
-hl.animation({ leaf = "windowsIn",     enabled = true,  speed = 4.1,  spring = "easy",         style = "popin 87%" })
-hl.animation({ leaf = "windowsOut",    enabled = true,  speed = 1.49, bezier = "linear",       style = "popin 87%" })
-hl.animation({ leaf = "fadeIn",        enabled = true,  speed = 1.73, bezier = "almostLinear" })
-hl.animation({ leaf = "fadeOut",       enabled = true,  speed = 1.46, bezier = "almostLinear" })
-hl.animation({ leaf = "fade",          enabled = true,  speed = 3.03, bezier = "quick" })
-hl.animation({ leaf = "layers",        enabled = true,  speed = 3.81, bezier = "easeOutQuint" })
-hl.animation({ leaf = "layersIn",      enabled = true,  speed = 4,    bezier = "easeOutQuint", style = "fade" })
-hl.animation({ leaf = "layersOut",     enabled = true,  speed = 1.5,  bezier = "linear",       style = "fade" })
-hl.animation({ leaf = "fadeLayersIn",  enabled = true,  speed = 1.79, bezier = "almostLinear" })
-hl.animation({ leaf = "fadeLayersOut", enabled = true,  speed = 1.39, bezier = "almostLinear" })
-hl.animation({ leaf = "workspaces",    enabled = true,  speed = 1.94, bezier = "almostLinear", style = "fade" })
-hl.animation({ leaf = "workspacesIn",  enabled = true,  speed = 1.21, bezier = "almostLinear", style = "fade" })
-hl.animation({ leaf = "workspacesOut", enabled = true,  speed = 1.94, bezier = "almostLinear", style = "fade" })
-hl.animation({ leaf = "zoomFactor",    enabled = true,  speed = 7,    bezier = "quick" })
+hl.animation({ leaf = "global",        enabled = true,  speed = 2,   bezier = "default" })
+hl.animation({ leaf = "border",        enabled = true,  speed = 2, bezier = "easeOutQuint" })
+hl.animation({ leaf = "windows",       enabled = true,  speed = 2.5, spring = "easy" })
+hl.animation({ leaf = "windowsIn",     enabled = true,  speed = 2.5, bezier = "snap",   style = "slide" })
+hl.animation({ leaf = "windowsOut",    enabled = true,  speed = 2.5, bezier = "snap",   style = "slide" })
+hl.animation({ leaf = "fadeIn",        enabled = true,  speed = 1.5, bezier = "snap" })
+hl.animation({ leaf = "fadeOut",       enabled = true,  speed = 1.5, bezier = "snap" })
+hl.animation({ leaf = "fade",          enabled = true,  speed = 2, bezier = "quick" })
+hl.animation({ leaf = "layers",        enabled = true,  speed = 1.5, bezier = "easeOutQuint" })
+hl.animation({ leaf = "layersIn",      enabled = true,  speed = 1.5,    bezier = "easeOutQuint", style = "fade" })
+hl.animation({ leaf = "layersOut",     enabled = true,  speed = 1,  bezier = "linear",       style = "fade" })
+hl.animation({ leaf = "fadeLayersIn",  enabled = true,  speed = 1.5, bezier = "almostLinear" })
+hl.animation({ leaf = "fadeLayersOut", enabled = true,  speed = 1, bezier = "almostLinear" })
+hl.animation({ leaf = "workspaces",    enabled = true,  speed = 2, bezier = "almostLinear", style = "slide" })
+hl.animation({ leaf = "workspacesIn",  enabled = true,  speed = 2, bezier = "almostLinear", style = "slide" })
+hl.animation({ leaf = "workspacesOut", enabled = true,  speed = 2, bezier = "almostLinear", style = "slide" })
+hl.animation({ leaf = "zoomFactor",    enabled = true,  speed = 3,    bezier = "quick" })
 
 -- Ref https://wiki.hypr.land/Configuring/Basics/Workspace-Rules/
 -- "Smart gaps" / "No gaps when only"

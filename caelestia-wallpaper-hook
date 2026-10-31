@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+# Caelestia wallpaper postHook: awww wipe transition, then mpvpaper (one per monitor) for videos.
+# The wipe starts from the frame currently playing, so switching away from a video doesn't jump.
+wall="$1"
+[ -f "$wall" ] || exit 1
+RUN="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
+THUMBS="$HOME/.cache/caelestia/video-thumbs"
+TRANSITION=(--transition-type wipe --transition-angle 225 --transition-step 90)
+is_video() { [[ "${1,,}" =~ \.(mp4|mkv|webm|mov|m4v)$ ]]; }
+ipc() { echo "$2" | timeout 1 socat - "$RUN/mpvpaper-$1.sock" 2>/dev/null; }
+
+pgrep -x awww-daemon >/dev/null || { awww-daemon &>/dev/null & disown; sleep 0.5; }
+mapfile -t monitors < <(hyprctl monitors -j | python3 -I -c 'import json,sys;[print(m["name"]) for m in json.load(sys.stdin)]')
+
+# Freeze each playing video and show its exact current frame on awww
+for m in "${monitors[@]}"; do
+    [ -S "$RUN/mpvpaper-$m.sock" ] || continue
+    ipc "$m" '{"command":["set_property","pause",true]}' >/dev/null
+    t=$(ipc "$m" '{"command":["get_property","playback-time"]}' | python3 -I -c 'import json,sys;print(json.load(sys.stdin).get("data") or 0)' 2>/dev/null)
+    src=$(ipc "$m" '{"command":["get_property","path"]}' | python3 -I -c 'import json,sys;print(json.load(sys.stdin).get("data") or "")' 2>/dev/null)
+    [ -f "$src" ] && ffmpeg -y -loglevel error -ss "${t:-0}" -i "$src" -frames:v 1 "$RUN/frame-$m.png" &&
+        awww img -o "$m" "$RUN/frame-$m.png" --transition-type none
+done
+pkill -x mpvpaper
+rm -f "$RUN"/mpvpaper-*.sock
+
+still="$wall"
+if is_video "$wall"; then
+    still="$THUMBS/full/$(basename "$wall").png"
+    mkdir -p "$THUMBS/full"
+    [ -f "$still" ] || ffmpeg -y -loglevel error -i "$wall" -frames:v 1 "$still"
+    # Small picker thumbnail
+    [ -f "$THUMBS/$(basename "$wall").jpg" ] || ffmpeg -y -loglevel error -i "$wall" -frames:v 1 -vf scale=480:-1 "$THUMBS/$(basename "$wall").jpg"
+fi
+
+awww img "$still" "${TRANSITION[@]}"
+
+if is_video "$wall"; then
+    sleep 1
+    for m in "${monitors[@]}"; do
+        mpvpaper -o "no-audio loop hwdec=auto input-ipc-server=$RUN/mpvpaper-$m.sock" "$m" "$wall" &>/dev/null & disown
+    done
+fi

@@ -1,0 +1,59 @@
+--- /usr/lib/python3.14/site-packages/caelestia/utils/wallpaper.py
++++ /usr/lib/python3.14/site-packages/caelestia/utils/wallpaper.py
+@@ -29,6 +29,26 @@
+     return path.is_file() and path.suffix.lower() in [".jpg", ".jpeg", ".png", ".webp", ".tif", ".tiff", ".gif"]
+ 
+ 
++VIDEO_EXTS = (".mp4", ".mkv", ".webm", ".mov", ".m4v")
++
++
++def is_valid_video(path: Path) -> bool:
++    return path.is_file() and path.suffix.lower() in VIDEO_EXTS
++
++
++def convert_video(wall: Path) -> Path:
++    cache = wallpapers_cache_dir / compute_hash(wall)
++    output_path = cache / "first_frame.png"
++    if not output_path.exists():
++        output_path.parent.mkdir(parents=True, exist_ok=True)
++        subprocess.run(
++            ["ffmpeg", "-y", "-i", str(wall), "-vframes", "1", str(output_path)],
++            stdout=subprocess.DEVNULL,
++            stderr=subprocess.DEVNULL,
++        )
++    return output_path
++
++
+ def check_wall(wall: Path, filter_size: tuple[int, int], threshold: float) -> bool:
+     with Image.open(wall) as img:
+         width, height = img.size
+@@ -105,6 +125,8 @@
+ 
+     if wall.suffix.lower() == ".gif":
+         wall = convert_gif(wall)
++    elif wall.suffix.lower() in VIDEO_EXTS:
++        wall = convert_video(wall)
+ 
+     name = "dynamic"
+ 
+@@ -151,11 +173,16 @@
+     # Make path absolute
+     wall = Path(wall).resolve()
+ 
+-    if not is_valid_image(wall):
+-        raise ValueError(f'"{wall}" is not a valid image')
++    if not is_valid_image(wall) and not is_valid_video(wall):
++        raise ValueError(f'"{wall}" is not a valid image or video')
+ 
+-    # Use gif's 1st frame for thumb only
+-    wall_cache = convert_gif(wall) if wall.suffix.lower() == ".gif" else wall
++    # Use gif/video 1st frame for thumb only
++    if wall.suffix.lower() == ".gif":
++        wall_cache = convert_gif(wall)
++    elif wall.suffix.lower() in VIDEO_EXTS:
++        wall_cache = convert_video(wall)
++    else:
++        wall_cache = wall
+ 
+     # Update files
+     wallpaper_path_path.parent.mkdir(parents=True, exist_ok=True)

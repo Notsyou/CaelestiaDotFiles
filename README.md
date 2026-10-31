@@ -5,7 +5,7 @@ My personal dotfiles for CachyOS + Hyprland + Caelestia shell. Includes MP4 wall
 ## What's included
 
 ### MP4/Video Wallpaper Support
-Patches Caelestia to accept video files as wallpapers using `mpvpaper`.
+Patches Caelestia to accept video files as wallpapers using `mpvpaper`, with an `awww` wipe transition on every wallpaper change (seamless from whatever frame is currently playing).
 
 ### Hyprland Config (`hypr/hyprland.lua`)
 - Dual monitor setup (DP-3 @ 180hz + HDMI-A-1 @ 144hz portrait)
@@ -27,13 +27,15 @@ Patches Caelestia to accept video files as wallpapers using `mpvpaper`.
 
 - `caelestia-cli` and `caelestia-shell`
 - `mpvpaper`
+- `awww` (formerly `swww`)
+- `socat`
 - `ffmpeg`
 - `thunar`
 - `tumbler` + `ffmpegthumbnailer` (for thumbnails)
 - `wl-clip-persist`
 
 ```bash
-sudo pacman -S --needed mpvpaper ffmpeg thunar tumbler ffmpegthumbnailer wl-clip-persist
+sudo pacman -S --needed mpvpaper awww socat ffmpeg thunar tumbler ffmpegthumbnailer wl-clip-persist
 ```
 
 ---
@@ -47,9 +49,9 @@ cd CaelestiaDotFiles
 ```
 
 This will:
-- Back up and patch the relevant Caelestia files
+- Back up and patch the relevant Caelestia files (via `apply-video-patches.sh`)
 - Install `~/.config/caelestia/cli.json`
-- Install `~/.local/bin/caelestia-gen-video-thumbs`
+- Install `~/.local/bin/caelestia-wallpaper-hook` (transition + mpvpaper, run by Caelestia's `postHook`)
 
 ### Manual steps after install
 
@@ -105,40 +107,19 @@ sudo cp caelestia-templates/thunar.css /usr/lib/python3.14/site-packages/caelest
 caelestia wallpaper -f /path/to/video.mp4
 ```
 
-Or pick from the `>wallpaper` launcher. Pre-generate thumbnails for all videos in `~/Pictures/Wallpapers/`:
+Or pick from the `>wallpaper` launcher (`Super + W`). Picker thumbnails are generated automatically the first time a video is set.
 
-```bash
-~/.local/bin/caelestia-gen-video-thumbs
-```
+### How it works
+- `patches/*.patch` are unified diffs against `caelestia-shell` 2.5.0 / `caelestia-cli` 1.1.3. They add video files to the picker, video thumbnails, skip drawing videos in Caelestia's own background, and use the first frame for colour generation.
+- `caelestia-wallpaper-hook` pauses each monitor's mpvpaper, grabs the exact current frame (`playback-time` over IPC + `ffmpeg -ss`), shows it on `awww`, wipes to the new wallpaper (`--transition-type wipe --transition-angle 225 --transition-step 90`), then starts one mpvpaper per monitor if the new wallpaper is a video.
 
 ---
 
 ## Notes
 
-- Caelestia package updates will overwrite patched files — re-run `./install.sh` and re-copy caelestia templates after updates.
+- Caelestia package updates will overwrite patched files — re-run `./apply-video-patches.sh` (safe to re-run; skips already-patched files) and re-copy caelestia templates after updates. If it reports `FAILED`, upstream changed that file and the patch needs porting.
 - Monitor config in `hyprland.lua` is specific to my setup, adjust to yours.
 - GTK theme uses Caelestia's Catppuccin Mocha color variables.
 
-### 🛠️ Setup & Troubleshooting for Xwayland Bridge
-
-If you are trying to get this script running on a new setup (and especially if copy/pasting from XWayland apps like Roblox Studio is failing), follow these steps to ensure it executes correctly.
-
-**1. Make the Script Executable**
-Before Hyprland (or any autostart sequence) can run the script, it must have execute permissions. Run this once in your terminal:
-\`\`\`bash
-chmod +x ~/CaelestiaDotFiles/scripts/xwayland-clip-bridge.sh
-\`\`\`
-
-**2. Add to Hyprland Autostart**
-Add the exact path to your `hyprland.conf` or `autostart.lua`.
-*   **Correct Syntax:** `exec-once = ~/CaelestiaDotFiles/scripts/xwayland-clip-bridge.sh`
-*   **Common Pitfall:** Never mix the tilde shortcut with the `/home` path. Using `~/home/username/...` will break the path. Use either `~` **OR** the absolute path `/home/username/`.
-*   **Case Sensitivity:** Linux is strictly case-sensitive. Ensure the folder is `scripts` (lowercase) and the file includes the hyphens exactly as named (`xwayland-clip-bridge.sh`).
-
-**3. How to Test It Live**
-Instead of restarting your window manager to test if it works:
-1. Open your terminal and run the script manually: `~/CaelestiaDotFiles/scripts/xwayland-clip-bridge.sh`
-2. Leave the terminal running (it will just show a blank line).
-3. Open your target X11 app (e.g., Roblox Studio), copy some text.
-4. Switch to a native Wayland app (like Firefox or the terminal) and paste.
-5. If successful, hit `Ctrl + C` in the terminal to stop the manual run, and trust that your `exec-once` will handle it on the next boot!
+### Clipboard
+Hyprland syncs the clipboard between Wayland and XWayland apps natively; `wl-clip-persist` keeps it alive after the source app closes. Don't run extra sync tools (`clipboard-sync`, polling `xclip`/`wl-copy` bridges) — they fight each other and wipe or strip the clipboard.

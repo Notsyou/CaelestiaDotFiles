@@ -1,0 +1,12 @@
+--- /etc/xdg/quickshell/caelestia/services/Wallpapers.qml
++++ /etc/xdg/quickshell/caelestia/services/Wallpapers.qml
+@@ -108,7 +108,8 @@
+ 
+         recursive: true
+         path: Paths.wallsdir
+-        filter: FileSystemModel.Images
++        filter: FileSystemModel.Files
++        nameFilters: ["*.jpg", "*.jpeg", "*.png", "*.webp", "*.tif", "*.tiff", "*.gif", "*.mp4", "*.mkv", "*.webm", "*.mov", "*.m4v"]
+     }
+ 
+     Process {
