@@ -49,9 +49,8 @@ hl.on("hyprland.start", function()
     hl.exec_cmd("wl-clip-persist --clipboard both")
     hl.exec_cmd(terminal)
     hl.exec_cmd("waybar")
-    hl.exec_cmd("~/.local/bin/caelestia-wallpaper-hook \"$(cat ~/.local/state/caelestia/wallpaper/path.txt)\"")
     hl.exec_cmd("firefox")
-    hl.exec_cmd("QT_QPA_PLATFORM=wayland QT_QUICK_BACKEND=basic caelestia shell -d")
+    hl.exec_cmd("QT_QPA_PLATFORM=wayland caelestia shell -d")
 end)
 
 

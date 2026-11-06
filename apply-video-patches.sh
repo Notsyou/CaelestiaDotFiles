@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Applies MP4 wallpaper patches to caelestia-cli/shell. Re-run after package updates.
+# Applies the MP4 wallpaper patch to caelestia-cli (first-frame colours). Re-run after package updates.
 set -euo pipefail
 cd "$(dirname "$(readlink -f "$0")")/patches"
 PYSITE=$(python3 -c "import site; print(site.getsitepackages()[0])")

@@ -5,13 +5,13 @@ My personal dotfiles for CachyOS + Hyprland + Caelestia shell. Includes MP4 wall
 ## What's included
 
 ### MP4/Video Wallpaper Support
-Patches Caelestia to accept video files as wallpapers using `mpvpaper`, with an `awww` wipe transition on every wallpaper change (seamless from whatever frame is currently playing).
+Uses `caelestia-shell` 2.5's built-in video wallpapers and wallpaper transitions (set to `DirectionalWipe`). A small `caelestia-cli` patch lets it take colours from a video's first frame.
 
 ### Hyprland Config (`hypr/hyprland.lua`)
 - Dual monitor setup (DP-3 @ 180hz + HDMI-A-1 @ 144hz portrait)
 - Catppuccin Mocha border colors
 - Custom keybindings
-- Autostart for waybar, mpvpaper, caelestia shell, wl-clip-persist
+- Autostart for waybar, caelestia shell, wl-clip-persist
 
 ### GTK/Thunar Theme (`gtk/`)
 - Dark theme matching Caelestia's Catppuccin Mocha colors
@@ -25,17 +25,14 @@ Patches Caelestia to accept video files as wallpapers using `mpvpaper`, with an 
 
 ## Requirements
 
-- `caelestia-cli` and `caelestia-shell`
-- `mpvpaper`
-- `awww` (formerly `swww`)
-- `socat`
+- `caelestia-cli` and `caelestia-shell` 2.5+
 - `ffmpeg`
 - `thunar`
 - `tumbler` + `ffmpegthumbnailer` (for thumbnails)
 - `wl-clip-persist`
 
 ```bash
-sudo pacman -S --needed mpvpaper awww socat ffmpeg thunar tumbler ffmpegthumbnailer wl-clip-persist
+sudo pacman -S --needed ffmpeg thunar tumbler ffmpegthumbnailer wl-clip-persist
 ```
 
 ---
@@ -49,9 +46,9 @@ cd CaelestiaDotFiles
 ```
 
 This will:
-- Back up and patch the relevant Caelestia files (via `apply-video-patches.sh`)
+- Back up and patch `caelestia-cli` (via `apply-video-patches.sh`)
 - Install `~/.config/caelestia/cli.json`
-- Install `~/.local/bin/caelestia-wallpaper-hook` (transition + mpvpaper, run by Caelestia's `postHook`)
+- Set `background.wallpaperTransition` in `~/.config/caelestia/shell.json`
 
 ### Manual steps after install
 
@@ -107,11 +104,11 @@ sudo cp caelestia-templates/thunar.css /usr/lib/python3.14/site-packages/caelest
 caelestia wallpaper -f /path/to/video.mp4
 ```
 
-Or pick from the `>wallpaper` launcher (`Super + W`). Picker thumbnails are generated automatically the first time a video is set.
+Or pick from the `>wallpaper` launcher (`Super + W`).
 
 ### How it works
-- `patches/*.patch` are unified diffs against `caelestia-shell` 2.5.0 / `caelestia-cli` 1.1.3. They add video files to the picker, video thumbnails, skip drawing videos in Caelestia's own background, and use the first frame for colour generation.
-- `caelestia-wallpaper-hook` pauses each monitor's mpvpaper, grabs the exact current frame (`playback-time` over IPC + `ffmpeg -ss`), shows it on `awww`, wipes to the new wallpaper (`--transition-type wipe --transition-angle 225 --transition-step 90`), then starts one mpvpaper per monitor if the new wallpaper is a video.
+- `caelestia-shell` plays videos and runs the transition itself. To change the effect, set `background.wallpaperTransition` in `~/.config/caelestia/shell.json` (for example `Iris`, `Smoke` or `Crossfade`).
+- `patches/cli-wallpaper.py.patch` is a unified diff against `caelestia-cli` 1.1.3. It accepts video files and uses the first frame for colour generation.
 
 ---
 

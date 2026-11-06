@@ -1,5 +1,1 @@
-{
-  "wallpaper": {
-    "postHook": "~/.local/bin/caelestia-wallpaper-hook \"$WALLPAPER_PATH\" >/dev/null 2>&1 &"
-  }
-}
+{}

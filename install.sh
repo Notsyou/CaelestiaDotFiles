@@ -6,15 +6,22 @@ PYSITE=$(python3 -c "import site; print(site.getsitepackages()[0])")
 # ── MP4 Wallpaper Patch ───────────────────────────────────────────────────────
 
 echo "Installing wallpaper dependencies..."
-sudo pacman -S --needed mpvpaper awww ffmpeg socat
+sudo pacman -S --needed ffmpeg
 
 # Applies diffs (not whole files) so a Caelestia update that changes them fails loudly
 ./apply-video-patches.sh
 
-mkdir -p ~/.config/caelestia ~/.local/bin ~/.cache/caelestia/video-thumbs
+mkdir -p ~/.config/caelestia ~/.cache/caelestia/video-thumbs
 cp cli.json ~/.config/caelestia/cli.json
-cp caelestia-wallpaper-hook ~/.local/bin/
-chmod +x ~/.local/bin/caelestia-wallpaper-hook
+
+# Enable the shell's built-in wipe, keeping any existing shell.json settings
+python3 - <<'PY'
+import json, os
+p = os.path.expanduser("~/.config/caelestia/shell.json")
+cfg = json.load(open(p)) if os.path.exists(p) else {}
+cfg.setdefault("background", {})["wallpaperTransition"] = "DirectionalWipe"
+json.dump(cfg, open(p, "w"), indent=4)
+PY
 
 # Install Thunar and essential plugins
 echo "Installing Thunar file manager..."
