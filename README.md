@@ -5,10 +5,10 @@ My personal dotfiles for CachyOS + Hyprland + Caelestia shell. Includes MP4 wall
 ## What's included
 
 ### MP4/Video Wallpaper Support
-Uses `caelestia-shell` 2.5's built-in video wallpapers and wallpaper transitions (set to `DirectionalWipe`). A small `caelestia-cli` patch lets it take colours from a video's first frame.
+Uses `caelestia-shell-git`'s built-in video wallpapers and wallpaper transitions (set to `DirectionalWipe`). A small `caelestia-cli` patch lets it take colours from a video's first frame.
 
 ### Hyprland Config (`hypr/hyprland.lua`)
-- Dual monitor setup (DP-3 @ 180hz + HDMI-A-1 @ 144hz portrait)
+- Monitor set to the laptop's eDP-1 @ 144hz; change it to match your displays
 - Catppuccin Mocha border colors
 - Custom keybindings
 - Autostart for waybar, caelestia shell, wl-clip-persist
@@ -25,14 +25,15 @@ Uses `caelestia-shell` 2.5's built-in video wallpapers and wallpaper transitions
 
 ## Requirements
 
-- `caelestia-cli` and `caelestia-shell` 2.5+
+- `caelestia-cli` and `caelestia-shell-git` (AUR). The stable `caelestia-shell` 2.5.0 has no video wallpapers or `wallpaperTransition`, and `install.sh` stops if it finds it
 - `ffmpeg`
 - `thunar`
 - `tumbler` + `ffmpegthumbnailer` (for thumbnails)
 - `wl-clip-persist`
+- `wtype` (for the `Super + W` wallpaper picker)
 
 ```bash
-sudo pacman -S --needed ffmpeg thunar tumbler ffmpegthumbnailer wl-clip-persist
+sudo pacman -S --needed ffmpeg thunar tumbler ffmpegthumbnailer wl-clip-persist wtype
 ```
 
 ---
@@ -48,15 +49,16 @@ cd CaelestiaDotFiles
 This will:
 - Back up and patch `caelestia-cli` (via `apply-video-patches.sh`)
 - Install `~/.config/caelestia/cli.json`
-- Set `background.wallpaperTransition` in `~/.config/caelestia/shell.json`
+- Install `scripts/open-wallpaper.sh` to `~/.local/bin`
+- Turn on `background.enabled` and `background.wallpaperEnabled`, and set `background.wallpaperTransition`, in `~/.config/caelestia/shell.json`
 
 ### Manual steps after install
 
 **Hyprland config:**
+Edit the `hl.monitor` lines first: the file is set to a laptop's `eDP-1`, so copying it unchanged will misconfigure other displays. Then:
 ```bash
 cp hypr/hyprland.lua ~/.config/hypr/hyprland.lua
 ```
-> Edit the monitor lines to match your setup before using.
 
 **GTK/Thunar theme:**
 ```bash
@@ -82,7 +84,7 @@ sudo cp caelestia-templates/thunar.css /usr/lib/python3.14/site-packages/caelest
 | `Super + R` | App launcher (hyprlauncher) |
 | `Super + B` | Firefox |
 | `Super + D` | Caelestia launcher |
-| `Super + W` | Wallpaper picker |
+| `Super + W` | Caelestia launcher in `>wallpaper` mode |
 | `Super + Q` | Close window |
 | `Super + M` | Shutdown |
 | `Super + V` | Toggle float |
@@ -115,7 +117,7 @@ Or pick from the `>wallpaper` launcher (`Super + W`).
 ## Notes
 
 - Caelestia package updates will overwrite patched files — re-run `./apply-video-patches.sh` (safe to re-run; skips already-patched files) and re-copy caelestia templates after updates. If it reports `FAILED`, upstream changed that file and the patch needs porting.
-- Monitor config in `hyprland.lua` is specific to my setup, adjust to yours.
+- Monitor config in `hyprland.lua` is set for a laptop's `eDP-1`, adjust to yours.
 - GTK theme uses Caelestia's Catppuccin Mocha color variables.
 
 ### Clipboard

@@ -12,13 +12,14 @@ fi
 # ── MP4 Wallpaper Patch ───────────────────────────────────────────────────────
 
 echo "Installing wallpaper dependencies..."
-sudo pacman -S --needed ffmpeg
+sudo pacman -S --needed ffmpeg wtype
 
 # Applies diffs (not whole files) so a Caelestia update that changes them fails loudly
 ./apply-video-patches.sh
 
 mkdir -p ~/.config/caelestia ~/.cache/caelestia/video-thumbs
 cp cli.json ~/.config/caelestia/cli.json
+install -Dm755 scripts/open-wallpaper.sh ~/.local/bin/open-wallpaper.sh
 
 # Enable the shell's wallpaper and built-in wipe, keeping any existing shell.json settings
 python3 - <<'PY'
