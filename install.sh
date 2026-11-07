@@ -3,6 +3,12 @@ set -e
 
 PYSITE=$(python3 -c "import site; print(site.getsitepackages()[0])")
 
+# Stable caelestia-shell 2.5.0 has no built-in video wallpapers or transitions
+if ! grep -qs wallpaperTransition /usr/lib/qt6/qml/Caelestia/Config/caelestia-config.qmltypes; then
+    echo "This setup needs a caelestia-shell with video wallpapers: install caelestia-shell-git from the AUR, then re-run." >&2
+    exit 1
+fi
+
 # ── MP4 Wallpaper Patch ───────────────────────────────────────────────────────
 
 echo "Installing wallpaper dependencies..."
@@ -14,12 +20,13 @@ sudo pacman -S --needed ffmpeg
 mkdir -p ~/.config/caelestia ~/.cache/caelestia/video-thumbs
 cp cli.json ~/.config/caelestia/cli.json
 
-# Enable the shell's built-in wipe, keeping any existing shell.json settings
+# Enable the shell's wallpaper and built-in wipe, keeping any existing shell.json settings
 python3 - <<'PY'
 import json, os
 p = os.path.expanduser("~/.config/caelestia/shell.json")
 cfg = json.load(open(p)) if os.path.exists(p) else {}
-cfg.setdefault("background", {})["wallpaperTransition"] = "DirectionalWipe"
+bg = cfg.setdefault("background", {})
+bg.update(enabled=True, wallpaperEnabled=True, wallpaperTransition="DirectionalWipe")
 json.dump(cfg, open(p, "w"), indent=4)
 PY
 
